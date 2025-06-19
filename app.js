@@ -1,8 +1,11 @@
+require('dotenv').config();
+
 const express = require('express');
 
 const app = express();
 
 const PORT = process.env.PORT || 3000;
+console.log(`Puerto: ${PORT}`);
 
 app.get('/', (req, res) => {
 
@@ -18,7 +21,7 @@ app.get('/', (req, res) => {
 
 app.listen(PORT, () => {
 
-    console.log(`anda cheto el puerto ${PORT}`);
+    console.log(`Server: http://localhost:${PORT}`)
 
 });
 
