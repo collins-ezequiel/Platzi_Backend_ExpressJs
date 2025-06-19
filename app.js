@@ -1,12 +1,15 @@
 require('dotenv').config();
 const express = require('express');
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
+
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+
 const loggerMiddleware = require('./middlewares/logger');
 const errorHandler = require('./middlewares/errorHandler');
-
-
-// Registramos el middleware para que se ejecute en todas las solicitudes
-
 const { validateUser } = require('./utils/validation');
+const authenticateToken = require('./middlewares/auth');
 
 const bodyParser = require('body-parser');
 
@@ -158,7 +161,76 @@ app.delete('/users/:id', (req, res) => {
 });
 
 app.get('/error', (req, res, next) => {
-  next(new Error("Error intencional"));
+    next(new Error("Error intencional"));
+});
+
+
+app.get('/db/users', async (req, res) => {
+    try {
+        const users = await prisma.user.findMany();
+        res.json(users);
+    } catch (error) {
+        res.status(500).json({ error: "Error al comunicarse con la base de datos" });
+    }
+});
+
+
+app.get('/protected-route', authenticateToken, (req, res) => {
+    res.send("Esta es una ruta protegida");
+});
+
+app.post('/register', async (req, res) => {
+    // Extraer información del cuerpo de la solicitud
+    const { email, password, name } = req.body;
+
+    // Encriptar la contraseña
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Crear el usuario en la base de datos
+    const newUser = await prisma.user.create({
+        data: {
+            email,
+            password: hashedPassword,
+            name,
+            role: 'USER'
+        }
+    });
+
+    // Enviar respuesta
+    res.status(201).json({ message: 'User registered successfully' });
+});
+
+app.post('/login', async (req, res) => {
+    // Extraer email y password del cuerpo de la solicitud
+    const { email, password } = req.body;
+
+    // Buscar el usuario en la base de datos
+    const user = await prisma.user.findUnique({
+        where: { email }
+    });
+
+    // Validar si el usuario existe
+    if (!user) {
+        return res.status(400).json({ error: "Invalid email or password" });
+    }
+
+    // Verificar si la contraseña coincide
+    const validPassword = await bcrypt.compare(password, user.password);
+
+    // Validar si la contraseña es correcta
+    if (!validPassword) {
+        return res.status(400).json({ error: "Invalid email or password" });
+    }
+
+    // Generar token JWT
+    const token = jwt.sign(
+        { id: user.id, role: user.role },
+        process.env.JWT_SECRET,
+        { expiresIn: '4h' }
+    );
+
+    // Devolver el token al cliente
+    res.json({ token });
 });
 
 app.listen(PORT, () => {
