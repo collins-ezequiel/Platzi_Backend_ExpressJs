@@ -1,27 +1,28 @@
 {
-  "name": "proyecto_curso",
+  "dependencies": {
+    "@prisma/client": "^6.4.1",
+    "bcryptjs": "^3.0.2",
+    "body-parser": "^1.20.3",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.13.3"
+  },
+  "name": "curso-expressjs",
   "version": "1.0.0",
-  "description": "",
+  "description": "curso express.js",
   "main": "app.js",
   "scripts": {
-    "dev": "node --watch app.js",
-    "start": "node app.js",
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "@prisma/client": "^6.10.1",
-    "bcrypt": "^6.0.0",
-    "bcryptjs": "^3.0.2",
-    "body-parser": "^2.2.0",
-    "dotenv": "^16.5.0",
-    "express": "^5.1.0",
-    "jsonwebtoken": "^9.0.2",
-    "pg": "^8.16.1"
-  },
+  "keywords": [
+    "['expressjs']"
+  ],
+  "author": "Oscar Barajas <oscar@platzi.com>",
+  "license": "MIT",
   "devDependencies": {
-    "prisma": "^6.10.1"
+    "prisma": "^6.4.1"
   }
 }

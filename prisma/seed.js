@@ -1,26 +1,66 @@
-// Utilizamos el cliente de Prisma para interactuar con la base de datos
+// prisma/seed.js
+
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 async function main() {
-    // Creación de usuarios de demostración
-/*     const users = [
-        { name: 'Usuario 1', email: 'usuario1@ejemplo.com' },
-        { name: 'Usuario 2', email: 'usuario2@ejemplo.com' },
-        { name: 'Usuario 3', email: 'usuario3@ejemplo.com' }
-    ];
-
-    for (const user of users) {
-        await prisma.user.create({
-            data: user
-        });
+  // Crear usuarios
+  const user1 = await prisma.user.create({
+    data: {
+      email: 'user1@example.com',
+      password: 'password123',
+      name: 'User One',
+      role: 'USER'
     }
+  });
 
-    console.log('Usuarios de demostración creados con éxito'); */
-    await prisma.user.deleteMany();
+  const user2 = await prisma.user.create({
+    data: {
+      email: 'admin@example.com',
+      password: 'admin123',
+      name: 'Admin User',
+      role: 'ADMIN'
+    }
+  });
 
+  // Crear bloques de tiempo
+  const timeBlock1 = await prisma.timeBlock.create({
+    data: {
+      startTime: new Date('2023-10-01T09:00:00Z'),
+      endTime: new Date('2023-10-01T10:00:00Z')
+    }
+  });
+
+  const timeBlock2 = await prisma.timeBlock.create({
+    data: {
+      startTime: new Date('2023-10-01T10:00:00Z'),
+      endTime: new Date('2023-10-01T11:00:00Z')
+    }
+  });
+
+  // Crear citas
+  await prisma.appointment.create({
+    data: {
+      date: new Date('2023-10-01T09:00:00Z'),
+      user: { connect: { id: user1.id } },
+      timeBlock: { connect: { id: timeBlock1.id } }
+    }
+  });
+
+  await prisma.appointment.create({
+    data: {
+      date: new Date('2023-10-01T10:00:00Z'),
+      user: { connect: { id: user2.id } },
+      timeBlock: { connect: { id: timeBlock2.id } }
+    }
+  });
 }
 
 main()
-    .catch(e => console.error(e))
-    .finally(async () => await prisma.$disconnect());
+  .catch(e => {
+    console.error(e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });
